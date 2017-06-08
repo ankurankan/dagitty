@@ -293,7 +293,7 @@
 	c(
 		Estimate=bo$t0,
 		"Std. Error"=sd(bo$t),
-		quantile(bo$t,c((1-conf.level)/2,1-(1-conf.level)/2))
+		quantile(bo$t,c((1-conf.level)/2,1-(1-conf.level)/2),na.rm=TRUE)
 	)
 }
 
