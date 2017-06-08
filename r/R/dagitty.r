@@ -1649,7 +1649,7 @@ downloadGraph <- function(x="dagitty.net/mz-Tuw9"){
 #'
 #' @export
 localTests <- function(x, data=NULL, 
-	type=c("cis","cis.loess","tetrads","tetrads.within","tetrads.between","tetrads.epistemic"),
+	type=c("cis","cis.lm","cis.loess","tetrads","tetrads.within","tetrads.between","tetrads.epistemic"),
 	tests=NULL,
 	sample.cov=NULL,sample.nobs=NULL,
 	conf.level=.95,R=NULL,
@@ -1729,7 +1729,7 @@ localTests <- function(x, data=NULL,
 			colnames(r) <- c("estimate","std.error","p.value",
 				paste0(100*w,"%"),paste0(100*(1-w),"%"))
 		}
-	} else if( type %in% c("cis","cis.loess") ){
+	} else if( type %in% c("cis","cis.lm","cis.loess") ){
 		if( is.null(tests) ){
 			tests <- impliedConditionalIndependencies( x )
 		}
@@ -1750,16 +1750,18 @@ localTests <- function(x, data=NULL,
 			colnames(r) <- c("estimate","std.error",
 				paste0(100*w,"%"),paste0(100*(1-w),"%"))
 		} else {
-			stopifnot( type=="cis" )
-			if( !is.null(data) ){
-				sample.cov <- cov2cor(cov(data))
-				sample.nobs <- nrow(data)
+			stopifnot( type %in% c("cis","cis.lm") )
+			if( type == "cis" ){
+				if( !is.null(data) ){
+					sample.cov <- cov2cor(cov(data))
+					sample.nobs <- nrow(data)
+				}
+				f <- function(i) .ci.test.covmat(sample.cov,sample.nobs,i,conf.level,tol)
+			} else{
+				f <- function(i) .ci.test.lm(data,i,conf.level,tol)
 			}
-			r <- as.data.frame(
-				row.names=row.names,
-				t(sapply( tests, function(i) 
-					.ci.test.covmat(sample.cov,sample.nobs,i,conf.level,tol) ))
-			)
+			r <- as.data.frame( row.names=row.names,
+				t(sapply( tests, f)) )
 			colnames(r) <- c("estimate","std.error","p.value",
 				paste0(100*w,"%"),paste0(100*(1-w),"%"))
 		}
