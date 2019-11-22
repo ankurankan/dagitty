@@ -1115,5 +1115,35 @@ var GraphTransformer = {
 		}
 		g.setType("pdag")
 		return g
+	},
+
+	ivTransform : function(g, x, y, scaling ){
+		g = g.clone()
+		debugger
+
+		if ( !g.isLatentNode( x ) && !g.isLatentNode( y ) ) {
+			return (g, x, y)
+		}
+		
+		if ( g.isLatentNode( x) ){
+			covariate = scaling[x]
+		}
+
+		if ( g.isLatentNode( y ) ) {
+			/* Add edge from the error term of Y to scaling indicator of Y */
+			dependent = scaling[y]
+		} else {
+			dependent = y
+		}
+
+		for ( parent_y in g.parentsOf( y ) ){
+			g.deleteEdge(parent_y, y)
+			if ( g.isLatentNode( parent_y )){
+				/* Add edge from the error term of scaling indicator of parent of y to the dependent */
+				var a = 1
+			}
+		}
+
+		return ( g, covariate, dependent)
 	}
 }

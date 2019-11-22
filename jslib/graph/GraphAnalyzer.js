@@ -963,7 +963,21 @@ var GraphAnalyzer = {
 			return W.map( function(v){return g.getVertex(v.id)} )
 		} 
 	},
-	
+
+	getScalingIndicators : function(g){
+		var scaling = {}
+		var latents = g.getLatentNodes()
+		for( const i in latents ){
+			adjacent = latents[i].getAdjacentNodes()
+			for ( const j in adjacent ){
+				if ( !g.isLatentNode( adjacent[j] ) && adjacent[j].getParents().filter( parent => g.isLatentNode( parent ) ).length == 1 ){
+					scaling[latents[i]] = adjacent[j]
+				}
+			}
+		}
+		return scaling
+	},
+
 	conditionalInstruments : function( g, x, y ){
 		if( arguments.length < 2 ){
 			x = g.getSources()
@@ -975,9 +989,14 @@ var GraphAnalyzer = {
 			if( y.length > 1 ) return false
 			y = y[0]
 		}
+
 		g = GraphTransformer.canonicalDag( g ).g
 		x = g.getVertex(x)
 		y = g.getVertex(y)
+
+		var scaling = GraphAnalyzer.getScalingIndicators(g)
+		[g, x, y] = GraphTransformer.ivTransform( g, x, y, scaling )
+
 		var vv = _.difference( g.getVertices(), [x,y] )
 		var i, r = [], W
 		var g_bd = GraphTransformer.backDoorGraph( 
