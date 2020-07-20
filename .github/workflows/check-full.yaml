@@ -27,7 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          remotes::install_deps(c("V8", "jsonlite", "boot", "MASS"))
+          remotes::install_cran(c("V8", "jsonlite", "boot", "MASS"))
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
