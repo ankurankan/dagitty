@@ -28,6 +28,13 @@ jobs:
           r-version: ${{ matrix.config.r }}
 
       - uses: r-lib/actions/setup-pandoc@master
+      
+      - name: Install system dependencies for Mac
+        if: runner.os == 'windows'
+        run: |
+          wget https://miktex.org/download/win/miktexsetup-x64.zip
+          unzip miktexsetup-x64.zip
+          miktexsetup --verbose --local-package-repository=C:\temp\miktex --package-set=complete download
 
       - name: Install system dependencies for Mac
         if: runner.os == 'macOS'
